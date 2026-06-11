@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<!-- Define the document type as HTML5 -->
+<html lang="en">
+<!-- Root HTML element, language set to English -->
+
+<head>
+    <meta charset="UTF-8">
+    <!-- Use UTF-8 encoding to support Turkish and special characters -->
+
+    <title>妻</title>
+    <!-- Title shown in the browser tab -->
+
+    <style>
+        /* Global styles for html and body */
+        html,
+        body {
+            margin: 0;
+            /* Remove default browser margins */
+
+            height: 100vh;
+            /* Make the height equal to the full viewport height */
+
+            overflow: hidden;
+            /* Disable scrolling */
+        }
+
+        body {
+            display: flex;
+            /* Use flexbox layout */
+
+            justify-content: center;
+            /* Center content horizontally */
+
+            align-items: center;
+            /* Center content vertically */
+
+            background-image: url('background.webp');
+            /* Background image */
+
+            background-size: cover;
+            /* Scale background image to cover entire screen */
+
+            background-position: center;
+            /* Center the background image */
+        }
+
+        /* Button styling */
+        button {
+            padding: 20px 40px;
+            /* Inner spacing of the button */
+
+            font-size: 20px;
+            /* Text size */
+
+            font-weight: bold;
+            /* Bold text */
+
+            background: linear-gradient(145deg, #ff4d4d, #b30000);
+            /* Red gradient background */
+
+            color: white;
+            /* White text color */
+
+            border: none;
+            /* Remove default border */
+
+            border-radius: 15px;
+            /* Rounded corners */
+
+            cursor: pointer;
+            /* Pointer cursor on hover */
+
+            box-shadow: 0 6px 0 #800000, 0 8px 20px rgba(0, 0, 0, 0.5);
+            /* Shadow for 3D effect */
+
+            transition: transform 3s ease-in-out, border-radius 2s ease;
+            /* Smooth animation when transforming */
+
+            z-index: 2;
+            /* Place button above background */
+
+            position: relative;
+            /* Required for z-index to work */
+        }
+
+        /* Button expanded state */
+        button.expand {
+            transform: scale(20);
+            /* Enlarge the button dramatically */
+
+            border-radius: 0;
+            /* Remove rounded corners */
+        }
+
+        /* Notes (text messages) styling */
+        .notes {
+            position: absolute;
+            /* Allow free positioning on the screen */
+
+            top: 0;
+            left: 0;
+            /* Default position (will be randomized later) */
+
+            color: white;
+            /* White text */
+
+            font-size: 32px;
+            /* Large font size */
+
+            font-family: "Georgia", serif;
+            /* Elegant serif font */
+
+            opacity: 0;
+            /* Initially invisible */
+
+            transition: opacity 1.5s ease;
+            /* Smooth fade-in animation */
+
+            z-index: 3;
+            /* Appear above button */
+
+            text-shadow: 0 0 8px rgba(255, 255, 255, 0.8),
+                         0 0 15px rgba(255, 100, 100, 0.7);
+            /* Glow effect for text */
+        }
+
+        /* Visible notes */
+        .notes.show {
+            opacity: 1;
+            /* Make note visible */
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Main clickable button -->
+    <button id="btn">My Heart</button>
+
+    <!-- Background music element -->
+    <audio id="bg-music" src="lagu-kotainitaksamatanpamu.mp3"></audio>
+
+    <script>
+        // Get the button element by ID
+        const button = document.getElementById("btn");
+
+        // Get the audio element by ID
+        const music = document.getElementById("bg-music");
+
+        // Array of romantic messages to display
+        const notes = [
+            "I’m so lucky to know you.",
+            "Every moment is more beautiful with you.",
+            "When you smile, the world shines brighter.",
+            "Everything is more meaningful with you.",
+            "My heart beats only for you.",
+            "You are my most precious one.",
+            "My life became complete with you.",
+            "Being with you is the best feeling.",
+            "Everything is more fun with you.",
+            "Even thinking of you makes me happy."
+        ];
+
+        // Handle button click event
+        button.addEventListener("click", () => {
+            button.classList.add("expand");
+            // Add expand animation class to the button
+
+            setTimeout(() => {
+                button.style.display = "none";
+                // Hide the button after animation
+
+                music.play();
+                // Start playing background music
+
+                showNotes();
+                // Display romantic notes
+            }, 3000);
+            // Wait 3 seconds before executing
+        });
+
+        // Function to display notes at random positions
+        function showNotes() {
+            const width = window.innerWidth;
+            // Get screen width
+
+            const height = window.innerHeight;
+            // Get screen height
+
+            const usedPositions = [];
+            // Store used positions to prevent overlap
+
+            notes.forEach((note, index) => {
+                const div = document.createElement("div");
+                // Create a new div element
+
+                div.classList.add("notes");
+                // Assign notes CSS class
+
+                div.innerText = note;
+                // Set the note text
+
+                document.body.appendChild(div);
+                // Add the note to the page
+
+                requestAnimationFrame(() => {
+                    const rect = div.getBoundingClientRect();
+                    // Get element size after rendering
+
+                    let x, y, tries = 0;
+                    // Variables for positioning
+
+                    do {
+                        x = Math.random() * (width - rect.width);
+                        // Random horizontal position
+
+                        y = Math.random() * (height - rect.height);
+                        // Random vertical position
+
+                        tries++;
+                        // Increase attempt counter
+                    } while (
+                        isOverlapping(x, y, rect.width, rect.height, usedPositions)
+                        && tries < 100
+                    );
+                    // Retry if overlapping with previous notes
+
+                    div.style.left = `${x}px`;
+                    // Apply horizontal position
+
+                    div.style.top = `${y}px`;
+                    // Apply vertical position
+
+                    usedPositions.push({
+                        x,
+                        y,
+                        width: rect.width,
+                        height: rect.height
+                    });
+                    // Save used position
+
+                    setTimeout(() => div.classList.add("show"), index * 2500);
+                    // Show notes one by one with delay
+                });
+            });
+        }
+
+        // Function to check if a note overlaps with existing notes
+        function isOverlapping(x, y, width, height, positions) {
+            return positions.some(pos =>
+                !(
+                    x + width < pos.x ||
+                    x > pos.x + pos.width ||
+                    y + height < pos.y ||
+                    y > pos.y + pos.height
+                )
+            );
+            // Return true if any overlap is detected
+        }
+    </script>
+</body>
+
+</html>
